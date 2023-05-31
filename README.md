@@ -13,30 +13,36 @@ you should use the [development template](https://github.com/shopware/developmen
 ## Branches and stability
 
 In each commit a composer.lock is contained to ensure that the version being
-deployed is the version that was tested in our CI. We currently provide two
+deployed is the version that was tested in our CI. We currently provide the following
 branches:
-- `6.1`: stable patch releases (`v6.1.0-rc2`, `v6.1.0`, `v6.1.19`, `v6.1.*`, but not `v6.2.0`)
-- `master`: stable minor+patch releases (`v6.1.3`, `v6.1.15`, `v6.2.0`, `v6.3.0`...)
+- `6.3`: stable minor and patch releases (`v6.3.0.0-rc2`, `v6.3.0.1`, `v6.3.1.0`, `v6.1.*`, but not `v6.4.0.0`)
+- `master`: stable major, minor and patch releases (`v6.3.0.0`, `v6.3.1.0`, `v6.4.0.0`, `v6.5.0.0`...)
 
-The `6.1` branch contains all the 6.1 releases. It's stable now and only gets non-breaking bug fixes. (security issues are an exception).
+The `6.3` branch contains all the 6.3 releases. It's stable now and only gets non-breaking changes. (security issues are an exception).
 
-The `master` branch contains the newest stable minor release. That may result in plugins being incompatible, so be careful.
+The `master` branch contains the newest stable release, including major releases. That may result in plugins being incompatible, so be careful.
+
+Starting with `6.3.0.0`, we use a slightly modified version of SemVer. The pattern looks like this: 6.MAJOR.MINOR.PATCH. Examples:
+* 6.3.2.5 - Major=3, Minor=2, Patch=5
+* 6.4.1.0 - Major=4, Minor=1, Patch=0
+
+See also: https://www.shopware.com/en/news/shopware-6-versioning-strategy/
 
 ## Requirements
 
-See [https://docs.shopware.com/en/shopware-platform-dev-en/getting-started/requirements](https://docs.shopware.com/en/shopware-platform-dev-en/getting-started/requirements)
+See [https://developer.shopware.com/docs/guides/installation/overview#prerequisites](https://developer.shopware.com/docs/guides/installation/overview#prerequisites)
 
-NPM and Node are only required during the build process and for development. If you dont have javascript customizations, it's not required at all. Because the storefront and admin are pre-build.
+NPM and Node are only required during the build process and for development. If you don't have javascript customizations it's not required at all because the storefront and admin are prebuilt.
 
 If you are using a separate build server, consider having NPM and Node as build-only requirements. Your operating application server doesn't require any of these to run Shopware 6.
 
 ## Setup and install
 
-To setup the environment and install with a basic setup run the following commands:
+To set up the environment and install with a basic setup run the following commands:
 
 ```bash
-# clone newest 6.1 patch version from github 
-git clone --branch=6.1 https://github.com/shopware/production shopware
+# clone the newest patch version from github 
+git clone --branch=[current version] https://github.com/shopware/production shopware
 cd shopware
 
 # install shopware and dependencies according to the composer.lock 
@@ -52,7 +58,7 @@ bin/console system:setup
 # create database with a basic setup (admin user and storefront sales channel)
 bin/console system:install --create-database --basic-setup
 
-# or use the interactive installer in the browser: /recovery/install/index.php
+# or run `bin/console assets:install` and use the interactive installer in the browser: /recovery/install/index.php
 ```
 
 ## Update
@@ -96,8 +102,8 @@ The following commands and scripts are available
 | `bin/console system:generate-jwt-secret` | Generates a new jwt secret |
 | `bin/console system:generate-app-secret` | Outputs a new app secret. This does not update your .env! |
 | `bin/console system:install` | Setup database and optional install some basic data |
-| `bin/console system:update-prepare` | Run update preparations before the update. Do not update if this fails |
-| `bin/console system:update-finish` | Executes the migrations and finishes the update |
+| `bin/console system:update:prepare` | Run update preparations before the update. Do not update if this fails |
+| `bin/console system:update:finish` | Executes the migrations and finishes the update |
 | `bin/console theme:change` | Assign theme to a sales channel |
 
 
@@ -188,9 +194,9 @@ You only need to require the things you want. If you only want to run shopware 6
         }
     },
     "require": {
-        "php": "~7.2",
-        "ocramius/package-versions": "1.4.0",
-        "shopware/core": "~v6.1.0"
+        "php": "~7.4",
+        "composer/package-versions-deprecated": "^1.8.0",
+        "shopware/core": "~v[current version]"
     }
 }
 ```
@@ -231,7 +237,7 @@ The following directories should be shared by all app servers:
 .
 ├── config
 │   ├── jwt # ro - should be written on first deployment
-│   ├── secrets # rw shared - see, if you want to use it: https://symfony.com/blog/new-in-symfony-4-4-encrypted-secrets-management 
+│   ├── secrets # rw shared - For usage refer to: https://symfony.com/blog/new-in-symfony-4-4-encrypted-secrets-management 
 ├── public
 │   ├── bundles # rw shared - Written by `assets:install` / `theme:compile`, can also be initiated by the administration
 │   ├── media # rw shared
@@ -239,12 +245,12 @@ The following directories should be shared by all app servers:
 │   └── thumbnail # rw shared - media thumbnails
 │   └── sitemap # rw shared - generated sitemaps
 ├── var
-│   ├── cache # rw local - contains the containers, which contains additional cache directories (twig, translations, etc)
-│   ├── log # a - append only, can be change in the monlog config
+│   ├── cache # rw local - contains the containers which contain additional cache directories (twig, translations, etc)
+│   ├── log # a - append only, can be changed in the monolog config
 
 ro - Readonly after deployment
 rw shared - read and write access, it should be shared across the app servers
-rw local - locale read and write access
+rw local - local read and write access
 ```
 
-Some of these directories like `public` can also be changed to different flysystem to host the files on s3 for example.
+Some of these directories like `public` can also be changed to a different flysystem to host the files on s3 for example.

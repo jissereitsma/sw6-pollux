@@ -1,36 +1,33 @@
-<?php
+<?php declare(strict_types=1);
 
-use Doctrine\DBAL\DBALException;
-use PackageVersions\Versions;
-use Shopware\Core\Framework\Adapter\Cache\CacheIdLoader;
-use Shopware\Core\Framework\Event\BeforeSendResponseEvent;
-use Shopware\Core\Framework\Plugin\KernelPluginLoader\DbalKernelPluginLoader;
-use Shopware\Core\Framework\Routing\RequestTransformerInterface;
-use Shopware\Production\HttpKernel;
-use Shopware\Production\Kernel;
-use Shopware\Storefront\Framework\Cache\CacheStore;
-use Symfony\Component\Debug\Debug;
+use Shopware\Core\HttpKernel;
+use Shopware\Core\Installer\InstallerKernel;
 use Symfony\Component\Dotenv\Dotenv;
+use Symfony\Component\ErrorHandler\Debug;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpKernel\HttpCache\HttpCache;
-use Doctrine\DBAL\Connection;
+use Symfony\Component\HttpFoundation\Response;
 
-if (PHP_VERSION_ID < 70200) {
+if (\PHP_VERSION_ID < 70403) {
     header('Content-type: text/html; charset=utf-8', true, 503);
 
     echo '<h2>Error</h2>';
-    echo 'Your server is running PHP version ' . PHP_VERSION . ' but Shopware 6 requires at least PHP 7.2.0';
-    exit();
+    echo 'Your server is running PHP version ' . \PHP_VERSION . ' but Shopware 6 requires at least PHP 7.4.3';
+    exit(1);
 }
 
-$classLoader = require __DIR__.'/../vendor/autoload.php';
+$classLoader = require __DIR__ . '/../vendor/autoload.php';
 
 if (!file_exists(dirname(__DIR__) . '/install.lock')) {
-    $basePath = 'recovery/install';
     $baseURL = str_replace(basename(__FILE__), '', $_SERVER['SCRIPT_NAME']);
     $baseURL = rtrim($baseURL, '/');
-    $installerURL = $baseURL . '/' . $basePath . '/index.php';
-    if (strpos($_SERVER['REQUEST_URI'], $basePath) === false) {
+    /* @deprecated tag:v6.5.0 remove if condition and else block, only the new installer will be supported */
+    if (class_exists(InstallerKernel::class)) {
+        $installerURL = $baseURL . '/installer';
+    } else {
+        $installerURL = $baseURL . '/recovery/install/index.php';
+    }
+
+    if (strpos($_SERVER['REQUEST_URI'], '/installer') === false) {
         header('Location: ' . $installerURL);
         exit;
     }
@@ -49,19 +46,13 @@ if (is_file(dirname(__DIR__) . '/files/update/update.json') || is_dir(dirname(__
     return;
 }
 
-// The check is to ensure we don't use .env if APP_ENV is defined
-if (!isset($_SERVER['APP_ENV']) && !isset($_ENV['APP_ENV'])) {
-    if (!class_exists(Dotenv::class)) {
-        throw new \RuntimeException('APP_ENV environment variable is not defined. You need to define environment variables for configuration or add "symfony/dotenv" as a Composer dependency to load variables from a .env file.');
-    }
-    $envFile = __DIR__.'/../.env';
-    if (file_exists($envFile)) {
-        (new Dotenv(true))->load($envFile);
-    }
+$projectRoot = dirname(__DIR__);
+if (class_exists(Dotenv::class) && (file_exists($projectRoot . '/.env.local.php') || file_exists($projectRoot . '/.env') || file_exists($projectRoot . '/.env.dist'))) {
+    (new Dotenv())->usePutenv()->setProdEnvs(['prod', 'e2e'])->bootEnv(dirname(__DIR__) . '/.env');
 }
 
 $appEnv = $_SERVER['APP_ENV'] ?? $_ENV['APP_ENV'] ?? 'dev';
-$debug = (bool) ($_SERVER['APP_DEBUG'] ?? $_ENV['APP_DEBUG'] ?? ('prod' !== $appEnv));
+$debug = (bool) ($_SERVER['APP_DEBUG'] ?? $_ENV['APP_DEBUG'] ?? ($appEnv !== 'prod' && $appEnv !== 'e2e'));
 
 if ($debug) {
     umask(0000);
@@ -69,19 +60,34 @@ if ($debug) {
     Debug::enable();
 }
 
-if ($trustedProxies = $_SERVER['TRUSTED_PROXIES'] ?? $_ENV['TRUSTED_PROXIES'] ?? false) {
-    Request::setTrustedProxies(explode(',', $trustedProxies), Request::HEADER_X_FORWARDED_ALL ^ Request::HEADER_X_FORWARDED_HOST);
+$trustedProxies = $_SERVER['TRUSTED_PROXIES'] ?? $_ENV['TRUSTED_PROXIES'] ?? false;
+if ($trustedProxies) {
+    Request::setTrustedProxies(explode(',', $trustedProxies), Request::HEADER_X_FORWARDED_FOR | Request::HEADER_X_FORWARDED_PORT | Request::HEADER_X_FORWARDED_PROTO);
 }
 
-if ($trustedHosts = $_SERVER['TRUSTED_HOSTS'] ?? $_ENV['TRUSTED_HOSTS'] ?? false) {
+$trustedHosts = $_SERVER['TRUSTED_HOSTS'] ?? $_ENV['TRUSTED_HOSTS'] ?? false;
+if ($trustedHosts) {
     Request::setTrustedHosts(explode(',', $trustedHosts));
 }
 
 $request = Request::createFromGlobals();
 
-$kernel = new HttpKernel($appEnv, $debug, $classLoader);
+if (file_exists(dirname(__DIR__) . '/install.lock')) {
+    $kernel = new HttpKernel($appEnv, $debug, $classLoader);
+
+    if ($_SERVER['COMPOSER_PLUGIN_LOADER'] ?? $_SERVER['DISABLE_EXTENSIONS'] ?? false) {
+        $kernel->setPluginLoader(new \Shopware\Core\Framework\Plugin\KernelPluginLoader\ComposerPluginLoader($classLoader));
+    }
+} else {
+    $kernel = new InstallerKernel($appEnv, $debug);
+}
+
 $result = $kernel->handle($request);
 
-$result->getResponse()->send();
-
-$kernel->terminate($result->getRequest(), $result->getResponse());
+if ($result instanceof Response) {
+    $result->send();
+    $kernel->terminate($request, $result);
+} else {
+    $result->getResponse()->send();
+    $kernel->terminate($result->getRequest(), $result->getResponse());
+}

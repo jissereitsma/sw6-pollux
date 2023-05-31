@@ -1,0 +1,4 @@
+framework:
+    ide: phpstorm
+web_profiler:
+    toolbar: false

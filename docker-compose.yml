@@ -1,46 +1,119 @@
-#override defaults for dev
-version: "3.7"
-
+# Yireo Shopware docker-compose 0.0.1
 services:
-  app_server:
-    image: shopware-production:local
-    build: .
+  nginx:
+    image: nginx:latest
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.sw6-pollux.rule=Host(`sw6.pollux.yr`)"
+      #- "traefik.http.routers.sw6-pollux.tls=true"
+    ports:
+      - 80
+    networks:
+      - shopware
+    volumes:
+      - .:/var/www/html:rw
+      - ./docker-compose/nginx/default.conf:/etc/nginx/conf.d/default.conf
     depends_on:
       - mysql
-      - elasticsearch
+      - redis
+      - php-fpm
+
+  php-fpm:
+    platform: linux/x86_64
+    build: ./docker-compose/php-fpm
     ports:
-      - 8000:8000
-      - 8005:8000
-    extra_hosts:
-      - "docker.vm:127.0.0.1"
+      - 9000
     environment:
-      # define yourself
-      #- DATABASE_URL
-      - APP_URL=http://docker.vm:8000
+      - APP_URL=http://sw6-pollux/
       - INSTANCE_ID=
       - SHOPWARE_ES_ENABLED=1
       - SHOPWARE_ES_HOSTS=elasticsearch:9200
       - SHOPWARE_ES_INDEXING_ENABLED=1
       - SHOPWARE_ES_INDEX_PREFIX=sw
       - SHOPWARE_CDN_STRATEGY_DEFAULT=id
+      - MAILER_URL=smtp://localhost:25?encryption=&auth_mode=
+    networks:
+      - shopware
     volumes:
-      - "./config/jwt:/sw6/config/jwt"
-      - "./public/bundles:/sw6/public/bundles"
-      - "./public/media:/sw6/public/media"
-      - "./public/sitemap:/sw6/public/sitemap"
-      - "./public/theme:/sw6/public/theme"
-      - "./public/thumbnail:/sw6/public/thumbnail"
-      - "./var:/sw6/var"
+      - .:/var/www/html:rw
+      - /data/git:/data/git
+      - ~/.composer:/var/www/.composer
+    depends_on:
+      - mysql
+      - elasticsearch
+      - redis
 
   mysql:
-    image: mysql:5.7
-    tmpfs:
-      - /var/lib/mysql:uid=999,gid=999
+    image: mysql:8.0
+    ports:
+      - 3306
+    networks:
+      - shopware
+    volumes:
+      - ./docker-compose/mysql/mysqld.cnf:/etc/mysql/mysql.conf.d/mysqld.cnf
+      - mysqldata:/var/lib/mysql
     environment:
       - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=shopware6
+      - MYSQL_USER=shopware6
+      - MYSQL_PASSWORD=shopware6
+    tmpfs:
+      - /tmp
 
   elasticsearch:
-    image: elastic/elasticsearch:7.1.1
+    image: elasticsearch:7.17.5
+    ports:
+      - 9200
+    networks:
+      - shopware
     environment:
+      - bootstrap.memory_lock=true
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
       - discovery.type=single-node
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
+    tmpfs:
+      - /tmp
+
+  redis:
+    image: redis:7.0
+    ports:
+      - 6379
+    networks:
+      - shopware
+
+  varnish:
+    image: varnish:stable
+    labels:
+      #- "traefik.enable=true"
+      - "traefik.http.routers.varnish-pollux.rule=Host(`varnish.pollux.yr`)"
+      #- "traefik.http.routers.varnish-pollux.tls=true"
+      #volumes:
+      #- ./default.vcl:/etc/varnish/default.vcl
+    ports:
+      - 80
+    networks:
+      - shopware
+    tmpfs:
+      - /var/lib/varnish:exec
+    environment:
+      - VARNISH_SIZE=2G
+    command: "-p default_keep=300"
+    depends_on:
+      - nginx
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    ports:
+      - 5672
+      - 15672
+    networks:
+      - shopware
+
+networks:
+    shopware:
+        driver: bridge
+
+volumes:
+    mysqldata:
+    esdata:
