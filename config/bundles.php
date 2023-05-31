@@ -1,6 +1,6 @@
-<?php declare(strict_types=1);
+<?php
 
-$bundles = [
+return [
     Symfony\Bundle\FrameworkBundle\FrameworkBundle::class => ['all' => true],
     Symfony\Bundle\MonologBundle\MonologBundle::class => ['all' => true],
     Sensio\Bundle\FrameworkExtraBundle\SensioFrameworkExtraBundle::class => ['all' => true],
@@ -15,19 +15,7 @@ $bundles = [
     Shopware\Administration\Administration::class => ['all' => true],
     Shopware\Storefront\Storefront::class => ['all' => true],
     Shopware\Elasticsearch\Elasticsearch::class => ['all' => true],
+    Shopware\Core\Maintenance\Maintenance::class => ['all' => true],
+    Shopware\Core\DevOps\DevOps::class => ['e2e' => true],
+    Shopware\Core\Profiling\Profiling::class => ['all' => true],
 ];
-
-if (\class_exists(Shopware\Core\Maintenance\Maintenance::class)) {
-    $bundles[Shopware\Core\Maintenance\Maintenance::class] = ['all' => true];
-}
-
-if (\class_exists(Shopware\Core\DevOps\DevOps::class)) {
-    $bundles[Shopware\Core\DevOps\DevOps::class] = ['e2e' => true];
-}
-
-if (\class_exists(Symfony\Bundle\WebProfilerBundle\WebProfilerBundle::class)) {
-    $bundles[Symfony\Bundle\WebProfilerBundle\WebProfilerBundle::class] = ['dev' => true, 'test' => true];
-    $bundles[Shopware\Core\Profiling\Profiling::class] = ['dev' => true];
-}
-
-return $bundles;
