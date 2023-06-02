@@ -7,3 +7,4 @@ cp .env.gitpod .env
 
 bin/console system:generate-jwt-secret
 bin/console system:generate-app-secret
+bin/console theme:compile

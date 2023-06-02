@@ -1,4 +1,4 @@
-FROM gitpod/workspace-base:latest
+FROM gitpod/workspace-full:latest
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
@@ -12,6 +12,7 @@ RUN sudo add-apt-repository ppa:ondrej/php -y && \
     symfony-cli \
     shopware-cli \
     mysql-client-8.0 \
+    nvm \
     nodejs && \
     sudo apt-get upgrade -y && \
     echo "memory_limit=512M" > php.ini && \
@@ -25,4 +26,10 @@ RUN sudo add-apt-repository ppa:ondrej/php -y && \
     echo "[client]" > ~/.my.cnf && \
     echo "host=127.0.0.1" >> ~/.my.cnf && \
     echo "user=root" >> ~/.my.cnf && \
-    echo "password=root" >> ~/.my.cnf
+    echo "password=root" >> ~/.my.cnf \
+
+RUN bash -c 'VERSION="14.8.0" \
+    && source $HOME/.nvm/nvm.sh && nvm install $VERSION \
+    && nvm use $VERSION && nvm alias default $VERSION'
+
+RUN echo "nvm use default &>/dev/null" >> ~/.bashrc.d/51-nvm-fix
