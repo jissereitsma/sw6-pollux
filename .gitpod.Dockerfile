@@ -11,7 +11,7 @@ RUN sudo add-apt-repository ppa:ondrej/php -y && \
     rsync \
     symfony-cli \
     shopware-cli \
-    mysql-client-8.0 \
+    mysql-client-8.0 && \
     sudo apt-get upgrade -y
 
 RUN echo "memory_limit=512M" > php.ini && \
