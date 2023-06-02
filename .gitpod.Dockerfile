@@ -3,7 +3,6 @@ FROM gitpod/workspace-full:latest
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 RUN sudo add-apt-repository ppa:ondrej/php -y && \
-    curl -fsSL https://deb.nodesource.com/setup_16.x | sudo bash - && \
     curl -1sLf 'https://dl.cloudsmith.io/public/symfony/stable/setup.deb.sh' | sudo -E bash && \
     curl -1sLf 'https://dl.cloudsmith.io/public/friendsofshopware/stable/setup.deb.sh'  | sudo -E bash && \
     sudo apt-get install -y \
@@ -13,9 +12,9 @@ RUN sudo add-apt-repository ppa:ondrej/php -y && \
     symfony-cli \
     shopware-cli \
     mysql-client-8.0 \
-    nodejs && \
-    sudo apt-get upgrade -y && \
-    echo "memory_limit=512M" > php.ini && \
+    sudo apt-get upgrade -y \
+
+RUN echo "memory_limit=512M" > php.ini && \
     echo "assert.active=0" >> php.ini && \
     echo "opcache.interned_strings_buffer=20" >> php.ini && \
     echo "zend.detect_unicode=0" >> php.ini && \
@@ -28,8 +27,7 @@ RUN sudo add-apt-repository ppa:ondrej/php -y && \
     echo "user=root" >> ~/.my.cnf && \
     echo "password=root" >> ~/.my.cnf \
 
-RUN curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash  \
-    bash -c 'VERSION="18.16.0" \
+RUN bash -c 'VERSION="18.16.0" \
     && source $HOME/.nvm/nvm.sh && nvm install $VERSION \
     && nvm use $VERSION && nvm alias default $VERSION'
 

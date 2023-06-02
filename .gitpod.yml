@@ -9,6 +9,7 @@ tasks:
         docker run --restart always -d --name=mysql -v /workspace/mysql:/var/lib/mysql -p 127.0.0.1:3306:3306 -e MYSQL_ROOT_PASSWORD=root mysql:8
         docker run --restart always -d --name=adminer --link mysql:mysql -p 5000:8080 -e ADMINER_DESIGN=pepa-linha -e ADMINER_DEFAULT_SERVER=mysql -e ADMINER_PLUGINS="tables-filter table-structure json-column version-noverify" ghcr.io/shyim/shopware-docker/adminer
 
+        cp .env.gitpod .env
         composer config --global github-oauth.github.com $(printf '%s\n' host=github.com | gp credential-helper get | sort | head -2 | tail -1 | sed 's;password=;;')
         composer install
 
@@ -25,6 +26,10 @@ tasks:
 
         ./bin/console framework:demodata --products 300
         ./bin/console dal:refresh:index
+        
+        ./bin/console system:generate-jwt-secret
+        ./bin/console system:generate-app-secret
+        ./bin/console theme:compile
 
         rm -rf var/cache/*
 
