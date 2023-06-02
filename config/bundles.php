@@ -15,4 +15,5 @@ return [
     Shopware\Core\Maintenance\Maintenance::class => ['all' => true],
     Shopware\Core\DevOps\DevOps::class => ['e2e' => true],
     Shopware\Core\Profiling\Profiling::class => ['all' => true],
+    Symfony\Bundle\WebProfilerBundle\WebProfilerBundle::class => ['dev' => true, 'test' => true],
 ];

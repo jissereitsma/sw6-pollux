@@ -83,3 +83,8 @@ custom/*
 /auth.json
 /install.lock
 ###< shopware/core ###
+
+###> friendsofphp/php-cs-fixer ###
+/.php-cs-fixer.php
+/.php-cs-fixer.cache
+###< friendsofphp/php-cs-fixer ###

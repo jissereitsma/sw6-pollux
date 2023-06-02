@@ -29,30 +29,39 @@
             "Shopware\\Production\\": "src/"
         }
     },
-    "repositories": [
-        {
+    "repositories": {
+        "shopware-packages": {
+            "type": "composer",
+            "url": "https://packages.shopware.com"
+        },
+        "0": {
             "type": "path",
             "url": "custom/plugins/*/packages/*",
             "options": {
                 "symlink": true
             }
         },
-        {
+        "1": {
             "type": "path",
             "url": "custom/static-plugins/*",
             "options": {
                 "symlink": true
             }
         }
-    ],
+    },
     "require": {
         "composer-runtime-api": "^2.0",
+        "frosh/development-helper": "^1.0",
         "shopware/administration": "~v6.5.0",
         "shopware/core": "~v6.5.0",
         "shopware/elasticsearch": "~v6.5.0",
         "shopware/storefront": "~v6.5.0",
+        "store.shopware.com/ennodebugplugin": "^1.0",
+        "store.shopware.com/ultradeveloper": "^2.0",
         "symfony/flex": "~2",
-        "symfony/runtime": "~6.2"
+        "symfony/runtime": "~6.2",
+        "yireo/shopware6-additional-config-commands": "^0.0.1",
+        "yireo/shopware6-additional-user-commands": "^0.0.1"
     },
     "extra": {
         "symfony": {
@@ -62,5 +71,8 @@
                 "flex://defaults"
             ]
         }
+    },
+    "require-dev": {
+        "shopware/dev-tools": "^1.0"
     }
 }

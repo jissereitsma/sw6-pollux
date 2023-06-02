@@ -5,7 +5,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.sw6-pollux.rule=Host(`sw6.pollux.yr`)"
-      #- "traefik.http.routers.sw6-pollux.tls=true"
+      - "traefik.http.routers.sw6-pollux.entrypoints=http"
     ports:
       - 80
     networks:
@@ -37,6 +37,7 @@ services:
     volumes:
       - .:/var/www/html:rw
       - /data/git:/data/git
+      - /usr/local/bin/symfony:/usr/local/bin/symfony
       - ~/.composer:/var/www/.composer
     depends_on:
       - mysql
@@ -45,6 +46,10 @@ services:
 
   mysql:
     image: mysql:8.0
+    labels:
+      - "traefik.enable=true"
+      - "traefik.tcp.routers.mysql-pollux.rule=HostSNI(`*`)"
+      - "traefik.tcp.routers.mysql-pollux.entrypoints=mysql"
     ports:
       - 3306
     networks:
@@ -62,6 +67,11 @@ services:
 
   elasticsearch:
     image: elasticsearch:7.17.5
+    labels:
+      - "traefik.enable=true"
+      - "traefik.tcp.routers.elasticsearch-pollux.rule=Host(`*`)"
+      - "traefik.tcp.routers.elasticsearch-pollux.entrypoints=elasticsearch"
+      - "traefik.tcp.routers.mysql.service=elasticsearch"
     ports:
       - 9200
     networks:
@@ -85,9 +95,10 @@ services:
   varnish:
     image: varnish:stable
     labels:
-      #- "traefik.enable=true"
+      - "traefik.enable=true"
       - "traefik.http.routers.varnish-pollux.rule=Host(`varnish.pollux.yr`)"
-      #- "traefik.http.routers.varnish-pollux.tls=true"
+      - "traefik.http.routers.varnish-pollux.tls=true"
+      - "traefik.http.routers.varnish-pollux.entrypoints=http"
       #volumes:
       #- ./default.vcl:/etc/varnish/default.vcl
     ports:
