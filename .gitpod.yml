@@ -13,20 +13,15 @@ tasks:
         composer config --global github-oauth.github.com $(printf '%s\n' host=github.com | gp credential-helper get | sort | head -2 | tail -1 | sed 's;password=;;')
         composer install
 
-        composer req --dev profiler fakerphp/faker mbezhanov/faker-provider-collection maltyxx/images-generator
-
-        # Configure Shopware
-        sed -i -e 's;DATABASE_URL=.*$;DATABASE_URL=mysql://root:root@127.0.0.1:3306/shopware;' .env
-        sed -i -e "s;APP_URL=.*$;APP_URL=$(gp url 8000);" .env
-        echo "TRUSTED_PROXIES=192.168.0.0/16" >> .env
-
         ./bin/console system:install --basic-setup --create-database --drop-database
 
         ./bin/console system:config:set core.frw.completedAt '2019-10-07T10:46:23+00:00'
 
-        ./bin/console framework:demodata --products 300
-        ./bin/console dal:refresh:index
-        
+        #./bin/console framework:demodata --products 300
+        echo "CREATE DATABASE shopware" | mysql -u root --password=root
+        mysql -u root --password=root shopware < dump.sql
+        #./bin/console dal:refresh:index
+
         ./bin/console system:generate-jwt-secret
         ./bin/console system:generate-app-secret
         ./bin/console theme:compile

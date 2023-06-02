@@ -2124,5 +2124,9 @@
         "assets\/styles\/icons.css": "c5d940d69dafe6cfe744f3282490ab41f309cc9a857fedb0157170cd59d68128",
         "assets\/styles\/reset.css": "62dd01c941ec7cd2b8aca3848c7ca061c071624dc1f187f5355e537356dcf8b2",
         "assets\/styles\/style.css": "d9b90bf8f9993333543d7dd31b345388768ae54d97aeed96463be6ef1d593eee"
+    },
+    "froshtools": {
+        "administration\/css\/frosh-tools.css": "87ab94ca96c0fe4f5831105aa0b009c8aeea735a6a51229e628871ff77bcf7cd",
+        "administration\/js\/frosh-tools.js": "fe1539c2fff4ec596e8b37658d48f3bf64a2c029807ef03d49dbbce4e682681e"
     }
 }

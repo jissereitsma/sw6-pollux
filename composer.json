@@ -52,6 +52,7 @@
     "require": {
         "composer-runtime-api": "^2.0",
         "frosh/development-helper": "^1.0",
+        "frosh/tools": "^1.0",
         "shopware/administration": "~v6.5.0",
         "shopware/core": "~v6.5.0",
         "shopware/elasticsearch": "~v6.5.0",
