@@ -200,5 +200,23 @@
             "webpack": null,
             "styleFiles": []
         }
+    },
+    "FroshTools": {
+        "basePath": "vendor\/frosh\/tools\/src\/",
+        "views": [
+            "Resources\/views"
+        ],
+        "technicalName": "frosh-tools",
+        "administration": {
+            "path": "Resources\/app\/administration\/src",
+            "entryFilePath": "Resources\/app\/administration\/src\/main.js",
+            "webpack": null
+        },
+        "storefront": {
+            "path": "Resources\/app\/storefront\/src",
+            "entryFilePath": null,
+            "webpack": null,
+            "styleFiles": []
+        }
     }
 }

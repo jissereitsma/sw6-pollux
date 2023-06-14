@@ -1,5 +1,11 @@
 shopware:
     admin_worker:
-        enable_admin_worker: false
+        enable_admin_worker: true
         poll_interval: 30
         transports: ["default"]
+
+    increment:
+        user_activity:
+            type: 'array'
+        message_queue:
+            type: 'array'
