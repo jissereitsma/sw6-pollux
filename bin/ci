@@ -40,7 +40,7 @@ $pluginLoader = new StaticKernelPluginLoader($classLoader, null);
 $databaseUrl = (string) EnvironmentHelper::getVariable('DATABASE_URL', getenv('DATABASE_URL'));
 if (trim($databaseUrl ?? '') === '') {
     // fake DATABASE_URL
-    $_SERVER['DATABASE_URL'] = Kernel::PLACEHOLDER_DATABASE_URL;
+    $_SERVER['DATABASE_URL'] = 'mysql://_placeholder.test';
 
     if (\class_exists(ComposerPluginLoader::class) && method_exists(InstalledVersions::class, 'getInstalledPackagesByType')) {
         $pluginLoader = new ComposerPluginLoader($classLoader, null);

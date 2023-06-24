@@ -1,4 +1,5 @@
 FROM ghcr.io/friendsofshopware/shopware-cli AS shopware-cli
+FROM node:18 AS node
 FROM php:8.2-fpm
 
 ARG UNAME=www-data
@@ -11,12 +12,17 @@ RUN useradd -G www-data jisse
 
 COPY --from=shopware-cli /usr/local/bin/shopware-cli /usr/local/bin/shopware-cli
 
+COPY --from=node /usr/local/lib/node_modules /usr/local/lib/node_modules
+COPY --from=node /usr/local/bin/node /usr/local/bin/node
+RUN ln -s /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm
+RUN chown -R $UID:$GID "/var/www/"
+
 #RUN curl -1sLf \
 #  'https://dl.cloudsmith.io/public/friendsofshopware/stable/setup.deb.sh' \
 #  | bash
 
 RUN apt-get update && apt-get -y install \
-#    shopware-cli \
+    jq \
     vim \
     cron \
     git \
@@ -39,7 +45,6 @@ RUN apt-get update && apt-get -y install \
     libicu-dev \
     libxml2-dev \
     libxslt-dev \
-    netcat \
     libyaml-dev
 
 RUN docker-php-ext-install pdo pdo_mysql

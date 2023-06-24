@@ -51,7 +51,7 @@
             "repo": "github.com/shopware/recipes",
             "branch": "main",
             "version": "6.4",
-            "ref": "ec371abdd958f453accc8a19083de008cd05f02f"
+            "ref": "d1a3b69bd3411f4724d213c6f7c4c54884b22793"
         },
         "files": [
             "bin/.htaccess",
@@ -69,8 +69,8 @@
             "public/.htaccess.dist",
             "public/index.php",
             "public/maintenance.html",
-            "var/.htaccess",
-            ".htaccess"
+            "root/.htaccess",
+            "var/.htaccess"
         ]
     },
     "shopware/elasticsearch": {

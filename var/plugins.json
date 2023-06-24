@@ -166,7 +166,7 @@
         }
     },
     "SwagPlatformDemoData": {
-        "basePath": "custom\/plugins\/SwagPlatformDemoData\/src\/",
+        "basePath": "custom\/plugins\/SwagPlatformDemoData\/\/src\/",
         "views": [
             "Resources\/views"
         ],
@@ -183,12 +183,52 @@
             "styleFiles": []
         }
     },
-    "YireoAdditionalConfigCommands": {
-        "basePath": "vendor\/yireo\/shopware6-additional-config-commands\/src\/",
+    "FroshTools": {
+        "basePath": "vendor\/frosh\/tools\/\/src\/",
         "views": [
             "Resources\/views"
         ],
-        "technicalName": "yireo-additional-config-commands",
+        "technicalName": "frosh-tools",
+        "administration": {
+            "path": "Resources\/app\/administration\/src",
+            "entryFilePath": "Resources\/app\/administration\/src\/main.js",
+            "webpack": null
+        },
+        "storefront": {
+            "path": "Resources\/app\/storefront\/src",
+            "entryFilePath": null,
+            "webpack": null,
+            "styleFiles": []
+        }
+    },
+    "SwagExampleTheme": {
+        "basePath": "custom\/plugins\/SwagExampleTheme\/\/src\/",
+        "views": [
+            "Resources\/views"
+        ],
+        "technicalName": "swag-example-theme",
+        "administration": {
+            "path": "Resources\/app\/administration\/src",
+            "entryFilePath": null,
+            "webpack": null
+        },
+        "storefront": {
+            "path": "Resources\/app\/storefront\/src",
+            "entryFilePath": "Resources\/app\/storefront\/src\/main.js",
+            "webpack": null,
+            "styleFiles": [
+                "custom\/plugins\/SwagExampleTheme\/src\/Resources\/app\/storefront\/src\/scss\/overrides.scss",
+                "@Storefront",
+                "custom\/plugins\/SwagExampleTheme\/src\/Resources\/app\/storefront\/src\/scss\/base.scss"
+            ]
+        }
+    },
+    "YireoExample": {
+        "basePath": "custom\/plugins\/YireoExample\/\/src\/",
+        "views": [
+            "Resources\/views"
+        ],
+        "technicalName": "yireo-example",
         "administration": {
             "path": "Resources\/app\/administration\/src",
             "entryFilePath": null,
@@ -201,15 +241,15 @@
             "styleFiles": []
         }
     },
-    "FroshTools": {
-        "basePath": "vendor\/frosh\/tools\/src\/",
+    "YireoListEntitiesCli": {
+        "basePath": "custom\/plugins\/YireoListEntitiesCli\/\/src\/",
         "views": [
             "Resources\/views"
         ],
-        "technicalName": "frosh-tools",
+        "technicalName": "yireo-list-entities-cli",
         "administration": {
             "path": "Resources\/app\/administration\/src",
-            "entryFilePath": "Resources\/app\/administration\/src\/main.js",
+            "entryFilePath": null,
             "webpack": null
         },
         "storefront": {

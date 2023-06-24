@@ -58,7 +58,7 @@ if ($input->getFirstArgument() === 'system:install') {
 $databaseUrl = (string) EnvironmentHelper::getVariable('DATABASE_URL', getenv('DATABASE_URL'));
 if (trim($databaseUrl ?? '') === '') {
     // fake DATABASE_URL
-    $_SERVER['DATABASE_URL'] = Kernel::PLACEHOLDER_DATABASE_URL;
+    $_SERVER['DATABASE_URL'] = 'mysql://_placeholder.test';
 } elseif (!EnvironmentHelper::hasVariable('INSTALL')) {
     $pluginLoader = new DbalKernelPluginLoader($classLoader, null, \Shopware\Core\Kernel::getConnection());
 }

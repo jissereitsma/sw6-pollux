@@ -6,6 +6,8 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.sw6-pollux.rule=Host(`sw6.pollux.yr`)"
       - "traefik.http.routers.sw6-pollux.entrypoints=http"
+      - "traefik.http.routers.sw6-pollux.service=sw6-pollux"
+      - "traefik.http.services.sw6-pollux.loadbalancer.server.port=80"
     ports:
       - 80
     networks:
@@ -17,12 +19,28 @@ services:
       - mysql
       - redis
       - php-fpm
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   php-fpm:
     platform: linux/x86_64
     build: ./docker-compose/php-fpm
+    labels:
+      - "traefik.enable=true"
+
+      - "traefik.http.routers.sw6webpack-pollux.rule=Host(`sw6.pollux.yr`)"
+      - "traefik.http.routers.sw6webpack-pollux.entrypoints=sw6webpack"
+      - "traefik.http.routers.sw6webpack-pollux.service=sw6webpack"
+      - "traefik.http.services.sw6webpack.loadbalancer.server.port=9998"
+
+      - "traefik.http.routers.sw6livereload-pollux.rule=Host(`sw6.pollux.yr`)"
+      - "traefik.http.routers.sw6livereload-pollux.entrypoints=sw6livereload"
+      - "traefik.http.routers.sw6livereload-pollux.service=sw6livereload"
+      - "traefik.http.services.sw6livereload.loadbalancer.server.port=9999"
     ports:
       - 9000
+      - 9998
+      - 9999
     environment:
       - APP_URL=http://sw6-pollux/
       - INSTANCE_ID=
@@ -37,12 +55,13 @@ services:
     volumes:
       - .:/var/www/html:rw
       - /data/git:/data/git
-      - /usr/local/bin/symfony:/usr/local/bin/symfony
       - ~/.composer:/var/www/.composer
     depends_on:
       - mysql
       - elasticsearch
       - redis
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   mysql:
     image: mysql:8.0
@@ -66,23 +85,30 @@ services:
       - /tmp
 
   elasticsearch:
-    image: elasticsearch:7.17.5
+    #image: elasticsearch:7.17.5
+    image: opensearchproject/opensearch:2
     labels:
       - "traefik.enable=true"
-      - "traefik.tcp.routers.elasticsearch-pollux.rule=Host(`*`)"
+      - "traefik.tcp.routers.elasticsearch-pollux.rule=HostSNI(`*`)"
       - "traefik.tcp.routers.elasticsearch-pollux.entrypoints=elasticsearch"
-      - "traefik.tcp.routers.mysql.service=elasticsearch"
     ports:
       - 9200
     networks:
       - shopware
     environment:
-      - bootstrap.memory_lock=true
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - "ES_JAVA_OPTS=-Xms2048m -Xmx2048m -XX:+DisableExplicitGC -XX:+AlwaysPreTouch -Xss1m"
+      - "OPENSEARCH_JAVA_OPTS=-Xms2048m -Xmx2048m"
+      - "DISABLE_INSTALL_DEMO_CONFIG=true"
+      - "DISABLE_SECURITY_DASHBOARDS_PLUGIN=true"
       - discovery.type=single-node
-    mem_limit: 1g
-    mem_reservation: 1g
-    cpus: 1
+      - plugins.security.disabled=true
+      - cluster.routing.allocation.disk.threshold_enabled=false
+      - script.painless.regex.enabled=true
+      - bootstrap.memory_lock=true
+      - network.host=0.0.0.0
+      - plugins.security.ssl.http.enabled=false
+      - cluster.name=opensearch-cluster
+      - node.name=opensearch-node1
     volumes:
       - esdata:/usr/share/elasticsearch/data
     tmpfs:
@@ -90,6 +116,10 @@ services:
 
   redis:
     image: redis:7.0
+    labels:
+      - "traefik.enable=true"
+      - "traefik.tcp.routers.redis-pollux.rule=HostSNI(`*`)"
+      - "traefik.tcp.routers.redis-pollux.entrypoints=redis"
     ports:
       - 6379
     networks:
@@ -98,12 +128,12 @@ services:
   varnish:
     image: varnish:stable
     labels:
-      - "traefik.enable=true"
+      #- "traefik.enable=true"
       - "traefik.http.routers.varnish-pollux.rule=Host(`varnish.pollux.yr`)"
-      - "traefik.http.routers.varnish-pollux.tls=true"
       - "traefik.http.routers.varnish-pollux.entrypoints=http"
-      #volumes:
-      #- ./default.vcl:/etc/varnish/default.vcl
+      - "traefik.http.routers.varnish-pollux.tls=true"
+    #volumes:
+    #  - ./default.vcl:/etc/varnish/default.vcl
     ports:
       - 80
     networks:
