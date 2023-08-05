@@ -32,13 +32,27 @@
             "config/packages/nyholm_psr7.yaml"
         ]
     },
+    "phpunit/phpunit": {
+        "version": "10.2",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "main",
+            "version": "9.6",
+            "ref": "7364a21d87e658eb363c5020c072ecfdc12e2326"
+        },
+        "files": [
+            ".env.test",
+            "phpunit.xml.dist",
+            "tests/bootstrap.php"
+        ]
+    },
     "shopware/administration": {
         "version": "6.5",
         "recipe": {
             "repo": "github.com/shopware/recipes",
             "branch": "main",
             "version": "6.4",
-            "ref": "bc67d148caf3affed5b5a023fee86784baea9140"
+            "ref": "55ec4f22e5275c67f7c61c689607fa37ba6d8acf"
         },
         "files": [
             "bin/build-administration.sh",

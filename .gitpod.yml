@@ -15,6 +15,7 @@ tasks:
         composer config --global github-oauth.github.com $(printf '%s\n' host=github.com | gp credential-helper get | sort | head -2 | tail -1 | sed 's;password=;;')
         composer install
 
+        test -f install.lock && rm install.lock
         ./bin/console system:install --basic-setup --create-database --drop-database
 
         ./bin/console system:config:set core.frw.completedAt '2019-10-07T10:46:23+00:00'
@@ -24,9 +25,11 @@ tasks:
         mysql -u root --password=root shopware < dump.sql
         #./bin/console dal:refresh:index
 
-        ./bin/console system:generate-jwt-secret
+        ./bin/console system:generate-jwt-secret -f
         ./bin/console system:generate-app-secret
         ./bin/console theme:compile
+        ./bin/build-administration.sh
+        ./bin/build-storefront.sh
 
         rm -rf var/cache/*
 

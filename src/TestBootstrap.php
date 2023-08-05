@@ -41,7 +41,7 @@ $key = openssl_pkey_new([
 // export private key
 $result = openssl_pkey_export_to_file($key, $jwtDir . '/private.pem');
 if ($result === false) {
-    throw new RuntimeException('Could not export private key to file');
+    throw new RuntimeException('Could not export private key to file: '.$jwtDir);
 }
 
 // export public key

@@ -7,10 +7,47 @@ export ENV_FILE=${ENV_FILE:-"${PROJECT_ROOT}/.env"}
 
 source "${ENV_FILE}"
 export HOST=${HOST:-"0.0.0.0"}
-export ESLINT_DISABLE
+export ESLINT_DISABLE=true
 export PORT=9999
-export APP_URL
+export APP_URL=http://nginx
 
 bin/console feature:dump || true
+bin/console bundle:dump || true
 
+if [[ $(command -v jq) ]]; then
+    OLDPWD=$(pwd)
+    cd "$PROJECT_ROOT" || exit
+
+    jq -c '.[]' "var/plugins.json" | while read -r config; do
+        srcPath=$(echo "$config" | jq -r '(.basePath + .administration.path)')
+
+        # the package.json files are always one upper
+        path=$(dirname "$srcPath")
+        name=$(echo "$config" | jq -r '.technicalName' )
+
+        skippingEnvVarName="SKIP_$(echo "$name" | sed -e 's/\([a-z]\)/\U\1/g' -e 's/-/_/g')"
+
+        if [[ ${!skippingEnvVarName-""} ]]; then
+            continue
+        fi
+
+        if [[ -f "$path/package.json" && ! -d "$path/node_modules" && $name != "administration" ]]; then
+            echo "=> Installing npm dependencies for ${name}"
+
+            npm install --prefix "$path"
+        fi
+    done
+    cd "$OLDPWD" || exit
+else
+    echo "Cannot check extensions for required npm installations as jq is not installed"
+fi
+
+bin/console -e prod framework:schema -s 'entity-schema' vendor/shopware/administration/Resources/app/administration/test/_mocks_/entity-schema.json
+
+if [ ! -d vendor/shopware/administration/Resources/app/administration/node_modules ]; then
+    npm install --prefix vendor/shopware/administration/Resources/app/administration/
+fi
+
+export DISABLE_ADMIN_COMPILATION_TYPECHECK=true;
+npm run --prefix vendor/shopware/administration/Resources/app/administration/ convert-entity-schema
 npm run --prefix vendor/shopware/administration/Resources/app/administration/ dev

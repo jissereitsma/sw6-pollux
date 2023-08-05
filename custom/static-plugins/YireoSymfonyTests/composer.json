@@ -1,0 +1,19 @@
+{
+  "name": "yireo/shopware6-symfony-tests",
+  "description": "Series of tests to demo Symfony service configurations",
+  "type": "shopware-platform-plugin",
+  "authors": [
+    {
+      "name": "Jisse Reitsma <jisse@yireo.com>"
+    }
+  ],
+  "require": {
+    "shopware/core": "~6.4"
+  },
+  "license": "MIT",
+  "autoload": {
+    "psr-4": {
+      "Yireo\\SymfonyTests\\": "src/"
+    }
+  }
+}

@@ -46,6 +46,17 @@ else
     echo "Cannot check extensions for required npm installations as jq is not installed"
 fi
 
-(cd "${ADMIN_ROOT}"/Resources/app/administration && npm clean-install && npm run build)
+if [ ! -d vendor/shopware/administration/Resources/app/administration/node_modules ]; then
+    npm install --prefix vendor/shopware/administration/Resources/app/administration/
+fi
+
+mkdir -p vendor/shopware/administration/Resources/app/administration/test/_mocks_/
+
+bin/console -e prod framework:schema -s 'entity-schema' vendor/shopware/administration/Resources/app/administration/test/_mocks_/entity-schema.json
+
+npm run --prefix vendor/shopware/administration/Resources/app/administration/ convert-entity-schema
+
+cd "${ADMIN_ROOT}"/Resources/app/administration && npm run build;
+
 [[ ${SHOPWARE_SKIP_ASSET_COPY-""} ]] ||"${BIN_TOOL}" assets:install
 
